@@ -7,7 +7,7 @@ import { redirect } from "next/navigation";
 // Hardcoded test user (you can later replace with DB lookup)
 const testUser = {
   id: "1",
-  email: "contact@cosdensolutions.io",
+  email: "admin@deliverypartners.io",
   password: "12345678",
 };
 
