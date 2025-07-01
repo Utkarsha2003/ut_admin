@@ -2,94 +2,87 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Calendar, Car, CreditCard, LayoutDashboard, Percent, Settings, Users, Bell, FileText } from "lucide-react"
+import {
+  Calendar,
+  Car,
+  CreditCard,
+  LayoutDashboard,
+  Percent,
+  Settings,
+  Users,
+  Bell,
+  FileText,
+  X,
+} from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 
 const sidebarItems = [
-  {
-    title: "Dashboard",
-    href: "/dashboard",
-    icon: LayoutDashboard,
-  },
-  {
-    title: "Bookings",
-    href: "/bookings",
-    icon: Calendar,
-  },
-  {
-    title: "Drivers",
-    href: "/drivers",
-    icon: Users,
-  },
-  {
-    title: "Vehicles",
-    href: "/vehicles",
-    icon: Car,
-  },
-  {
-    title: "Users",
-    href: "/users",
-    icon: Users,
-  },
-  {
-    title: "Coupons",
-    href: "/coupons",
-    icon: Percent,
-  },
-  {
-    title: "Transactions",
-    href: "/transactions",
-    icon: CreditCard,
-  },
-  {
-    title: "Notifications",
-    href: "/notifications",
-    icon: Bell,
-  },
-  {
-    title: "Reports",
-    href: "/reports",
-    icon: FileText,
-  },
-  {
-    title: "Settings",
-    href: "/settings",
-    icon: Settings,
-  },
+  { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { title: "Bookings", href: "/bookings", icon: Calendar },
+  { title: "Drivers", href: "/drivers", icon: Users },
+  { title: "Vehicles", href: "/vehicles", icon: Car },
+  { title: "Users", href: "/users", icon: Users },
+  { title: "Coupons", href: "/coupons", icon: Percent },
+  { title: "Transactions", href: "/transactions", icon: CreditCard },
+  { title: "Notifications", href: "/notifications", icon: Bell },
+  { title: "Reports", href: "/reports", icon: FileText },
+  { title: "Settings", href: "/settings", icon: Settings },
 ]
 
-export function Sidebar() {
+export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const pathname = usePathname()
 
   return (
-    <div className="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0 z-[80] bg-background border-r">
-      <div className="flex flex-col flex-1 min-h-0 overflow-y-auto">
-        <div className="flex items-center h-16 px-6 border-b shrink-0">
-          <Link href="/" className="flex items-center gap-2 font-semibold">
-            <Car className="h-6 w-6" />
-            <span className="text-lg">TransportAdmin</span>
-          </Link>
+    <>
+      {isOpen && (
+        <div
+          className="fixed inset-0 z-40 backdrop-blur-sm bg-white/30 md:hidden"
+          onClick={onClose}
+        />
+      )}
+
+
+      <div
+        className={cn(
+          "fixed inset-y-0 left-0 z-50 w-64 bg-white border-r shadow-md transform transition-transform duration-300",
+          isOpen ? "translate-x-0" : "-translate-x-full",
+          "md:translate-x-0 md:static md:shadow-none md:flex"
+        )}
+      >
+        <div className="flex flex-col h-full">
+          <div className="flex items-center justify-between h-16 px-6 border-b shrink-0">
+            <Link href="/" className="flex items-center gap-2 font-semibold">
+              <Car className="h-6 w-6" />
+              <span className="text-lg">TransportAdmin</span>
+            </Link>
+            <button className="md:hidden" onClick={onClose}>
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+
+          <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+            {sidebarItems.map((item) => (
+              <Button
+                key={item.href}
+                variant={pathname.startsWith(item.href) ? "secondary" : "ghost"}
+                className={cn(
+                  "w-full justify-start",
+                  pathname.startsWith(item.href)
+                    ? "bg-muted font-medium"
+                    : "font-normal"
+                )}
+                asChild
+              >
+                <Link href={item.href}>
+                  <item.icon className="mr-2 h-5 w-5" />
+                  {item.title}
+                </Link>
+              </Button>
+            ))}
+          </nav>
         </div>
-        <nav className="flex-1 p-4 space-y-1">
-          {sidebarItems.map((item) => (
-            <Button
-              key={item.href}
-              variant={pathname.startsWith(item.href) ? "secondary" : "ghost"}
-              className={cn(
-                "w-full jnpmustify-start",
-                pathname.startsWith(item.href) ? "bg-muted font-medium" : "font-normal",
-              )}
-              asChild
-            >
-              <Link href={item.href}>
-                <item.icon className="mr-2 h-5 w-5" />
-                {item.title}
-              </Link>
-            </Button>
-          ))}
-        </nav>
       </div>
-    </div>
+    </>
   )
 }

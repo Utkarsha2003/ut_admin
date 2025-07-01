@@ -3,8 +3,6 @@
 import { useState } from "react"
 import { Bell, Menu } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { Sidebar } from "@/components/sidebar"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,29 +14,31 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 
-export function Header() {
+interface HeaderProps {
+  onMobileMenuClick: () => void
+}
+
+export function Header({ onMobileMenuClick }: HeaderProps) {
   const [notificationCount, setNotificationCount] = useState(3)
 
   return (
     <header className="sticky top-0 z-40 border-b bg-background">
       <div className="flex h-16 items-center justify-between px-4 md:px-6">
-        {/* Hamburger Menu for Mobile Only */}
+        {/* Mobile Hamburger Button */}
         <div className="flex items-center md:hidden">
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button variant="outline" size="icon" className="md:hidden">
-                <Menu className="h-5 w-5" />
-                <span className="sr-only">Toggle navigation menu</span>
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="w-72 p-0">
-              <Sidebar />
-            </SheetContent>
-          </Sheet>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={onMobileMenuClick}
+            className="md:hidden"
+          >
+            <Menu className="h-5 w-5" />
+            <span className="sr-only">Toggle navigation menu</span>
+          </Button>
         </div>
 
         <div className="flex items-center gap-2 ml-auto">
-          {/* Notifications Dropdown */}
+          {/* Notifications */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="icon" className="relative">
@@ -61,13 +61,16 @@ export function Header() {
               <DropdownMenuItem>Driver John D. is now online</DropdownMenuItem>
               <DropdownMenuItem>New vehicle onboarding request</DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => setNotificationCount(0)} className="text-center cursor-pointer">
+              <DropdownMenuItem
+                onClick={() => setNotificationCount(0)}
+                className="text-center cursor-pointer"
+              >
                 Mark all as read
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
 
-          {/* Avatar Dropdown */}
+          {/* Avatar */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative h-8 w-8 rounded-full">

@@ -1,26 +1,37 @@
-"use client";
+"use client"
 
-import { usePathname } from "next/navigation";
-import { Sidebar } from "@/components/sidebar";
-import { Header } from "@/components/header";
+import { useState } from "react"
+import { usePathname } from "next/navigation"
+import { Sidebar } from "@/components/sidebar"
+import { Header } from "@/components/header"
+import { Sheet, SheetContent } from "@/components/ui/sheet"
 
 export function LayoutWrapper({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname();
-  const isAuthPage = pathname.startsWith("/login");
+  const pathname = usePathname()
+  const isAuthPage = pathname.startsWith("/login")
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
 
-  if (isAuthPage) {
-    return <>{children}</>; // No sidebar/header on login
-  }
+  if (isAuthPage) return <>{children}</>
 
   return (
     <div className="flex h-screen overflow-hidden">
+      {/* Desktop sidebar */}
       <aside className="hidden md:flex md:w-64">
-        <Sidebar />
+        <Sidebar isOpen={true} onClose={() => {}} />
       </aside>
-      <div className="flex flex-col flex-1 overflow-hidden">
-        <Header />
-        <main className="flex-1 overflow-y-auto p-4 md:p-6">{children}</main>
-      </div>
+
+      {/* Mobile sidebar */}
+      <Sheet open={mobileSidebarOpen} onOpenChange={setMobileSidebarOpen}>
+        <SheetContent side="left" className="p-0 w-72">
+          <Sidebar isOpen={true} onClose={() => setMobileSidebarOpen(false)} />
+        </SheetContent>
+
+        {/* Main layout */}
+        <div className="flex flex-col flex-1 overflow-hidden">
+          <Header onMobileMenuClick={() => setMobileSidebarOpen(true)} />
+          <main className="flex-1 overflow-y-auto p-4 md:p-6">{children}</main>
+        </div>
+      </Sheet>
     </div>
-  );
+  )
 }
