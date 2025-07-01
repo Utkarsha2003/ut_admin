@@ -1,6 +1,8 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter } from "next/navigation"
+import { logout } from "@/app/login/actions"
 import { Bell, Menu } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -20,6 +22,12 @@ interface HeaderProps {
 
 export function Header({ onMobileMenuClick }: HeaderProps) {
   const [notificationCount, setNotificationCount] = useState(3)
+  const router = useRouter()
+
+  const handleLogout = async () => {
+    await logout()
+    router.push("/login")
+  }
 
   return (
     <header className="sticky top-0 z-40 border-b bg-background">
@@ -86,7 +94,7 @@ export function Header({ onMobileMenuClick }: HeaderProps) {
               <DropdownMenuItem>Profile</DropdownMenuItem>
               <DropdownMenuItem>Settings</DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>Log out</DropdownMenuItem>
+              <DropdownMenuItem onClick={handleLogout}>Log out</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

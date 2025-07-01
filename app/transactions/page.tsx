@@ -1,17 +1,22 @@
 "use client"
 
+import { useState, useMemo } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
-import { Download } from "lucide-react"
+import { Download, Search, X } from "lucide-react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Input } from "@/components/ui/input"
 import { DatePicker } from "@/components/date-picker"
-import { useState } from "react"
 
 export default function TransactionsPage() {
-  const [startDate, setStartDate] = useState<Date | undefined>(undefined)
-  const [endDate, setEndDate] = useState<Date | undefined>(undefined)
+  const [startDate, setStartDate] = useState<Date | undefined>()
+  const [endDate, setEndDate] = useState<Date | undefined>()
+  const [statusFilter, setStatusFilter] = useState("all")
+  const [driverFilter, setDriverFilter] = useState("all")
+  const [paymentMethodFilter, setPaymentMethodFilter] = useState("all")
+  const [searchQuery, setSearchQuery] = useState("")
 
   const transactions = [
     {
@@ -50,7 +55,7 @@ export default function TransactionsPage() {
       paymentMethod: "Wallet",
       status: "completed",
     },
-    {
+      {
       id: "T-5004",
       bookingId: "B-1239",
       customer: "Lisa Rodriguez",
@@ -100,6 +105,25 @@ export default function TransactionsPage() {
     },
   ]
 
+  const filteredTransactions = useMemo(() => {
+    return transactions.filter((txn) => {
+      const txnDate = new Date(txn.date)
+      const matchesStart = !startDate || txnDate >= startDate
+      const matchesEnd = !endDate || txnDate <= endDate
+      const matchesStatus = statusFilter === "all" || txn.status === statusFilter
+      const matchesDriver = driverFilter === "all" || txn.driver.toLowerCase().includes(driverFilter.toLowerCase())
+      const matchesPayment = paymentMethodFilter === "all" || txn.paymentMethod.toLowerCase().includes(paymentMethodFilter.toLowerCase())
+      const query = searchQuery.toLowerCase()
+      const matchesSearch =
+        txn.id.toLowerCase().includes(query) ||
+        txn.customer.toLowerCase().includes(query) ||
+        txn.driver.toLowerCase().includes(query) ||
+        txn.bookingId.toLowerCase().includes(query)
+
+      return matchesStart && matchesEnd && matchesStatus && matchesDriver && matchesPayment && matchesSearch
+    })
+  }, [startDate, endDate, statusFilter, driverFilter, paymentMethodFilter, searchQuery])
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "completed":
@@ -131,95 +155,96 @@ export default function TransactionsPage() {
           <CardDescription>View and filter transactions by date, driver, or payment method.</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-4 md:grid-cols-4">
+          
+          <div className="grid gap-4 md:grid-cols-5">
+                        {/* Start Date */}
             <div className="grid gap-2">
-              <label htmlFor="start-date" className="text-sm font-medium">
-                Start Date
-              </label>
-              <DatePicker
-                id="start-date"
-                selected={startDate}
-                onSelect={setStartDate}
-                placeholder="Select start date"
-              />
+              <label htmlFor="start-date" className="text-sm font-medium">Start Date</label>
+              <div className="relative">
+                <DatePicker
+                  id="start-date"
+                  selected={startDate}
+                  onSelect={setStartDate}
+                  placeholder="Select start date"
+                  className="w-full"
+                />
+                {startDate && (
+                  <button
+                    type="button"
+                    onClick={() => setStartDate(undefined)}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-full bg-gray-200 hover:bg-gray-300"
+                  >
+                    <X className="w-3 h-2.5 text-gray-600" />
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* End Date */}
+            <div className="grid gap-2">
+              <label htmlFor="end-date" className="text-sm font-medium">End Date</label>
+              <div className="relative">
+                <DatePicker
+                  id="end-date"
+                  selected={endDate}
+                  onSelect={setEndDate}
+                  placeholder="Select end date"
+                  className="w-full"
+                />
+                {endDate && (
+                  <button
+                    type="button"
+                    onClick={() => setEndDate(undefined)}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-full bg-gray-200 hover:bg-gray-300"
+                  >
+                    <X className="w-3 h-2.5 text-gray-600" />
+                  </button>
+                )}
+              </div>
             </div>
             <div className="grid gap-2">
-              <label htmlFor="end-date" className="text-sm font-medium">
-                End Date
-              </label>
-              <DatePicker id="end-date" selected={endDate} onSelect={setEndDate} placeholder="Select end date" />
-            </div>
-            <div className="grid gap-2">
-              <label htmlFor="driver-filter" className="text-sm font-medium">
-                Driver
-              </label>
-              <Select>
+              <label htmlFor="driver-filter" className="text-sm font-medium">Driver</label>
+              <Select onValueChange={setDriverFilter}>
                 <SelectTrigger id="driver-filter">
                   <SelectValue placeholder="All drivers" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All drivers</SelectItem>
-                  <SelectItem value="david">David Johnson</SelectItem>
-                  <SelectItem value="michael">Michael Brown</SelectItem>
-                  <SelectItem value="james">James Wilson</SelectItem>
-                  <SelectItem value="thomas">Thomas Anderson</SelectItem>
+                  <SelectItem value="david johnson">David Johnson</SelectItem>
+                  <SelectItem value="michael brown">Michael Brown</SelectItem>
+                  <SelectItem value="james wilson">James Wilson</SelectItem>
+                  <SelectItem value="thomas anderson">Thomas Anderson</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="grid gap-2">
-              <label htmlFor="payment-method" className="text-sm font-medium">
-                Payment Method
-              </label>
-              <Select>
+              <label htmlFor="payment-method" className="text-sm font-medium">Payment Method</label>
+              <Select onValueChange={setPaymentMethodFilter}>
                 <SelectTrigger id="payment-method">
                   <SelectValue placeholder="All methods" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All methods</SelectItem>
-                  <SelectItem value="credit-card">Credit Card</SelectItem>
+                  <SelectItem value="credit card">Credit Card</SelectItem>
                   <SelectItem value="cash">Cash</SelectItem>
                   <SelectItem value="wallet">Wallet</SelectItem>
                 </SelectContent>
               </Select>
             </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Transaction Summary</CardTitle>
-          <CardDescription>Overview of all transactions and commissions.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-4 md:grid-cols-3">
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">$270.25</div>
-                <p className="text-xs text-muted-foreground">For selected period</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">Driver Commissions</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">$216.20</div>
-                <p className="text-xs text-muted-foreground">80% of total revenue</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">Platform Fees</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">$54.05</div>
-                <p className="text-xs text-muted-foreground">20% of total revenue</p>
-              </CardContent>
-            </Card>
+            <div className="grid gap-2">
+              <label htmlFor="search" className="text-sm font-medium">Search</label>
+              <div className="relative">
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="search"
+                  type="search"
+                  placeholder="Search..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-8"
+                />
+              </div>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -227,7 +252,7 @@ export default function TransactionsPage() {
       <Card>
         <CardHeader>
           <CardTitle>Transaction List</CardTitle>
-          <CardDescription>A list of all transactions with their details.</CardDescription>
+          <CardDescription>Filtered transaction results.</CardDescription>
         </CardHeader>
         <CardContent className="p-0">
           <Table>
@@ -246,18 +271,18 @@ export default function TransactionsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {transactions.map((transaction) => (
-                <TableRow key={transaction.id}>
-                  <TableCell className="font-medium">{transaction.id}</TableCell>
-                  <TableCell>{transaction.bookingId}</TableCell>
-                  <TableCell>{transaction.customer}</TableCell>
-                  <TableCell>{transaction.driver}</TableCell>
-                  <TableCell>{transaction.date}</TableCell>
-                  <TableCell>{transaction.amount}</TableCell>
-                  <TableCell>{transaction.driverCommission}</TableCell>
-                  <TableCell>{transaction.platformFee}</TableCell>
-                  <TableCell>{transaction.paymentMethod}</TableCell>
-                  <TableCell>{getStatusBadge(transaction.status)}</TableCell>
+              {filteredTransactions.map((txn) => (
+                <TableRow key={txn.id}>
+                  <TableCell className="font-medium">{txn.id}</TableCell>
+                  <TableCell>{txn.bookingId}</TableCell>
+                  <TableCell>{txn.customer}</TableCell>
+                  <TableCell>{txn.driver}</TableCell>
+                  <TableCell>{txn.date}</TableCell>
+                  <TableCell>{txn.amount}</TableCell>
+                  <TableCell>{txn.driverCommission}</TableCell>
+                  <TableCell>{txn.platformFee}</TableCell>
+                  <TableCell>{txn.paymentMethod}</TableCell>
+                  <TableCell>{getStatusBadge(txn.status)}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

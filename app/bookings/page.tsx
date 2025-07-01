@@ -1,102 +1,75 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { DatePicker } from "@/components/date-picker"
-import { Download, Filter, Search } from "lucide-react"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Download, Filter, Search, X } from "lucide-react"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 export default function BookingsPage() {
   const [startDate, setStartDate] = useState<Date | undefined>(undefined)
   const [endDate, setEndDate] = useState<Date | undefined>(undefined)
+  const [statusFilter, setStatusFilter] = useState<string>("all")
+  const [searchQuery, setSearchQuery] = useState<string>("") 
 
   const bookings = [
-    {
-      id: "B-1234",
-      customer: "John Smith",
-      driver: "David Johnson",
-      date: "2023-05-21",
-      amount: "$45.00",
-      status: "completed",
-    },
-    {
-      id: "B-1235",
-      customer: "Sarah Williams",
-      driver: "Michael Brown",
-      date: "2023-05-21",
-      amount: "$32.50",
-      status: "completed",
-    },
-    {
-      id: "B-1236",
-      customer: "Robert Davis",
-      driver: "James Wilson",
-      date: "2023-05-21",
-      amount: "$28.75",
-      status: "in-progress",
-    },
-    {
-      id: "B-1237",
-      customer: "Jennifer Miller",
-      driver: "Pending Assignment",
-      date: "2023-05-22",
-      amount: "$52.25",
-      status: "pending",
-    },
-    {
-      id: "B-1238",
-      customer: "Michael Garcia",
-      driver: "Pending Assignment",
-      date: "2023-05-22",
-      amount: "$38.00",
-      status: "pending",
-    },
-    {
-      id: "B-1239",
-      customer: "Lisa Rodriguez",
-      driver: "Thomas Anderson",
-      date: "2023-05-20",
-      amount: "$42.75",
-      status: "completed",
-    },
-    {
-      id: "B-1240",
-      customer: "William Martinez",
-      driver: "Christopher Lee",
-      date: "2023-05-20",
-      amount: "$35.50",
-      status: "completed",
-    },
-    {
-      id: "B-1241",
-      customer: "Elizabeth Taylor",
-      driver: "Daniel White",
-      date: "2023-05-19",
-      amount: "$48.25",
-      status: "completed",
-    },
-    {
-      id: "B-1242",
-      customer: "James Johnson",
-      driver: "Matthew Harris",
-      date: "2023-05-19",
-      amount: "$29.75",
-      status: "cancelled",
-    },
-    {
-      id: "B-1243",
-      customer: "Patricia Brown",
-      driver: "Andrew Wilson",
-      date: "2023-05-18",
-      amount: "$37.50",
-      status: "completed",
-    },
+    { id: "B-1234", customer: "John Smith", driver: "David Johnson", date: "2023-05-21", amount: "$45.00", status: "completed" },
+    { id: "B-1235", customer: "Sarah Williams", driver: "Michael Brown", date: "2023-05-21", amount: "$32.50", status: "completed" },
+    { id: "B-1236", customer: "Robert Davis", driver: "James Wilson", date: "2023-05-21", amount: "$28.75", status: "in-progress" },
+    { id: "B-1237", customer: "Jennifer Miller", driver: "Pending Assignment", date: "2023-05-22", amount: "$52.25", status: "pending" },
+    { id: "B-1238", customer: "Michael Garcia", driver: "Pending Assignment", date: "2023-05-22", amount: "$38.00", status: "pending" },
+    { id: "B-1239", customer: "Lisa Rodriguez", driver: "Thomas Anderson", date: "2023-05-20", amount: "$42.75", status: "completed" },
+    { id: "B-1240", customer: "William Martinez", driver: "Christopher Lee", date: "2023-05-20", amount: "$35.50", status: "completed" },
+    { id: "B-1241", customer: "Elizabeth Taylor", driver: "Daniel White", date: "2023-05-19", amount: "$48.25", status: "completed" },
+    { id: "B-1242", customer: "James Johnson", driver: "Matthew Harris", date: "2023-05-19", amount: "$29.75", status: "cancelled" },
+    { id: "B-1243", customer: "Patricia Brown", driver: "Andrew Wilson", date: "2023-05-18", amount: "$37.50", status: "completed" },
   ]
+
+  const filteredBookings = useMemo(() => {
+    return bookings.filter((booking) => {
+      const bookingDate = new Date(booking.date)
+      const isAfterStart = !startDate || bookingDate >= startDate
+      const isBeforeEnd = !endDate || bookingDate <= endDate
+      const matchesStatus = statusFilter === "all" || booking.status === statusFilter
+
+      const query = searchQuery.toLowerCase() 
+      const matchesSearch =
+        booking.id.toLowerCase().includes(query) ||
+        booking.customer.toLowerCase().includes(query) ||
+        booking.driver.toLowerCase().includes(query)
+
+      return isAfterStart && isBeforeEnd && matchesStatus && matchesSearch
+    })
+  }, [startDate, endDate, statusFilter, searchQuery]) 
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -130,28 +103,56 @@ export default function BookingsPage() {
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-4">
+            {/* Start Date */}
             <div className="grid gap-2">
-              <label htmlFor="start-date" className="text-sm font-medium">
-                Start Date
-              </label>
-              <DatePicker
-                id="start-date"
-                selected={startDate}
-                onSelect={setStartDate}
-                placeholder="Select start date"
-              />
+              <label htmlFor="start-date" className="text-sm font-medium">Start Date</label>
+              <div className="relative">
+                <DatePicker
+                  id="start-date"
+                  selected={startDate}
+                  onSelect={setStartDate}
+                  placeholder="Select start date"
+                  className="w-full"
+                />
+                {startDate && (
+                  <button
+                    type="button"
+                    onClick={() => setStartDate(undefined)}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-full bg-gray-200 hover:bg-gray-300"
+                  >
+                    <X className="w-3 h-2.5 text-gray-600" />
+                  </button>
+                )}
+              </div>
             </div>
+
+            {/* End Date */}
             <div className="grid gap-2">
-              <label htmlFor="end-date" className="text-sm font-medium">
-                End Date
-              </label>
-              <DatePicker id="end-date" selected={endDate} onSelect={setEndDate} placeholder="Select end date" />
+              <label htmlFor="end-date" className="text-sm font-medium">End Date</label>
+              <div className="relative">
+                <DatePicker
+                  id="end-date"
+                  selected={endDate}
+                  onSelect={setEndDate}
+                  placeholder="Select end date"
+                  className="w-full"
+                />
+                {endDate && (
+                  <button
+                    type="button"
+                    onClick={() => setEndDate(undefined)}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-full bg-gray-200 hover:bg-gray-300"
+                  >
+                    <X className="w-3 h-2.5 text-gray-600" />
+                  </button>
+                )}
+              </div>
             </div>
+
+            {/* Status */}
             <div className="grid gap-2">
-              <label htmlFor="status" className="text-sm font-medium">
-                Status
-              </label>
-              <Select>
+              <label htmlFor="status" className="text-sm font-medium">Status</label>
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
                 <SelectTrigger id="status">
                   <SelectValue placeholder="All statuses" />
                 </SelectTrigger>
@@ -164,13 +165,20 @@ export default function BookingsPage() {
                 </SelectContent>
               </Select>
             </div>
+
+            
             <div className="grid gap-2">
-              <label htmlFor="search" className="text-sm font-medium">
-                Search
-              </label>
+              <label htmlFor="search" className="text-sm font-medium">Search</label>
               <div className="relative">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input id="search" type="search" placeholder="Search bookings..." className="pl-8" />
+                <Input
+                  id="search"
+                  type="search"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search bookings..."
+                  className="pl-8"
+                />
               </div>
             </div>
           </div>
@@ -196,7 +204,7 @@ export default function BookingsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {bookings.map((booking) => (
+              {filteredBookings.map((booking) => (
                 <TableRow key={booking.id}>
                   <TableCell className="font-medium">{booking.id}</TableCell>
                   <TableCell>{booking.customer}</TableCell>

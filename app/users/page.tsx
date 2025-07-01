@@ -1,5 +1,6 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -10,79 +11,34 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 export default function UsersPage() {
   const users = [
-    {
-      id: "U-3001",
-      name: "John Smith",
-      phone: "+1 (555) 123-4567",
-      email: "john.smith@example.com",
-      registrationDate: "2023-01-15",
-      trips: 12,
-      status: "active",
-    },
-    {
-      id: "U-3002",
-      name: "Sarah Williams",
-      phone: "+1 (555) 234-5678",
-      email: "sarah.williams@example.com",
-      registrationDate: "2023-02-20",
-      trips: 8,
-      status: "active",
-    },
-    {
-      id: "U-3003",
-      name: "Robert Davis",
-      phone: "+1 (555) 345-6789",
-      email: "robert.davis@example.com",
-      registrationDate: "2023-02-28",
-      trips: 5,
-      status: "active",
-    },
-    {
-      id: "U-3004",
-      name: "Jennifer Miller",
-      phone: "+1 (555) 456-7890",
-      email: "jennifer.miller@example.com",
-      registrationDate: "2023-03-10",
-      trips: 3,
-      status: "inactive",
-    },
-    {
-      id: "U-3005",
-      name: "Michael Garcia",
-      phone: "+1 (555) 567-8901",
-      email: "michael.garcia@example.com",
-      registrationDate: "2023-03-15",
-      trips: 7,
-      status: "active",
-    },
-    {
-      id: "U-3006",
-      name: "Lisa Rodriguez",
-      phone: "+1 (555) 678-9012",
-      email: "lisa.rodriguez@example.com",
-      registrationDate: "2023-04-05",
-      trips: 2,
-      status: "active",
-    },
-    {
-      id: "U-3007",
-      name: "William Martinez",
-      phone: "+1 (555) 789-0123",
-      email: "william.martinez@example.com",
-      registrationDate: "2023-04-12",
-      trips: 4,
-      status: "blocked",
-    },
-    {
-      id: "U-3008",
-      name: "Elizabeth Taylor",
-      phone: "+1 (555) 890-1234",
-      email: "elizabeth.taylor@example.com",
-      registrationDate: "2023-04-20",
-      trips: 1,
-      status: "active",
-    },
+    { id: "U-3001", name: "John Smith", phone: "+1 (555) 123-4567", email: "john.smith@example.com", registrationDate: "2023-01-15", trips: 12, status: "active" },
+    { id: "U-3002", name: "Sarah Williams", phone: "+1 (555) 234-5678", email: "sarah.williams@example.com", registrationDate: "2023-02-20", trips: 8, status: "active" },
+    { id: "U-3003", name: "Robert Davis", phone: "+1 (555) 345-6789", email: "robert.davis@example.com", registrationDate: "2023-02-28", trips: 5, status: "active" },
+    { id: "U-3004", name: "Jennifer Miller", phone: "+1 (555) 456-7890", email: "jennifer.miller@example.com", registrationDate: "2023-03-10", trips: 3, status: "inactive" },
+    { id: "U-3005", name: "Michael Garcia", phone: "+1 (555) 567-8901", email: "michael.garcia@example.com", registrationDate: "2023-03-15", trips: 7, status: "active" },
+    { id: "U-3006", name: "Lisa Rodriguez", phone: "+1 (555) 678-9012", email: "lisa.rodriguez@example.com", registrationDate: "2023-04-05", trips: 2, status: "active" },
+    { id: "U-3007", name: "William Martinez", phone: "+1 (555) 789-0123", email: "william.martinez@example.com", registrationDate: "2023-04-12", trips: 4, status: "blocked" },
+    { id: "U-3008", name: "Elizabeth Taylor", phone: "+1 (555) 890-1234", email: "elizabeth.taylor@example.com", registrationDate: "2023-04-20", trips: 1, status: "active" },
   ]
+
+  const [filteredUsers, setFilteredUsers] = useState(users)
+  const [statusFilter, setStatusFilter] = useState("all")
+  const [searchQuery, setSearchQuery] = useState("")
+
+  useEffect(() => {
+    const filtered = users.filter((user) => {
+      const matchesStatus = statusFilter === "all" || user.status === statusFilter
+      const query = searchQuery.toLowerCase()
+      const matchesSearch =
+        user.name.toLowerCase().includes(query) ||
+        user.email.toLowerCase().includes(query) ||
+        user.phone.toLowerCase().includes(query)
+
+      return matchesStatus && matchesSearch
+    })
+
+    setFilteredUsers(filtered)
+  }, [statusFilter, searchQuery])
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -114,7 +70,7 @@ export default function UsersPage() {
               <label htmlFor="status-filter" className="text-sm font-medium">
                 Status
               </label>
-              <Select>
+              <Select onValueChange={setStatusFilter}>
                 <SelectTrigger id="status-filter">
                   <SelectValue placeholder="All statuses" />
                 </SelectTrigger>
@@ -132,7 +88,14 @@ export default function UsersPage() {
               </label>
               <div className="relative">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input id="search-users" type="search" placeholder="Search users..." className="pl-8" />
+                <Input
+                  id="search-users"
+                  type="search"
+                  placeholder="Search users..."
+                  className="pl-8"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
               </div>
             </div>
           </div>
@@ -159,7 +122,7 @@ export default function UsersPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {users.map((user) => (
+              {filteredUsers.map((user) => (
                 <TableRow key={user.id}>
                   <TableCell className="font-medium">{user.id}</TableCell>
                   <TableCell>{user.name}</TableCell>
